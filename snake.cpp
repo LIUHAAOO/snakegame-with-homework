@@ -1,5 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include<bits/stdc++.h> 
+#include<bits/stdc++.h>
 #include <windows.h>
 #include<iomanip>
 #include <iostream>
@@ -13,6 +12,8 @@
 #include <set>
 #include<vector>
 #include <fstream>
+#include <graphics.h>
+const auto LIGHTYELLOW = RGB(255, 255, 204);
 using namespace std; //使用命名空间std	
 const int board_len = 20; //棋盘的长度
 struct inf_node {
@@ -46,19 +47,63 @@ deque<pair<int, int>> snake_body; //蛇身 -- 一个双端队列
 pair<int, int> food;  //食物的位置(x, y)
 string star = "***";
 int len = 20;
-int calc(int x) {
-	int a = len - 6 - x;
-	a /= 2;
-	return a;
+void print_warning() {
+    initgraph(800, 600); // 初始化图形窗口
+    settextstyle(20, 0, _T("宋体")); // 设置字体大小和样式
+    int screenWidth = getwidth(); // 获取屏幕宽度
+    int screenHeight = getheight(); // 获取屏幕高度
+
+    string warningText = "\n声明：该游戏处于未开发完全状态存在许多BUG以及设计的不合理性\n\n";
+    int textHeight = 20 * count(warningText.begin(), warningText.end(), '\n');
+    // 计算起始位置，使文本居中显示
+    int startX = 0; // 居中显示，400 是文本宽度的估计值
+    int startY = 0; // 垂直居中显示
+    // 输出警告消息文本
+    outtextxy(startX, startY, warningText.c_str());
+    this_thread::sleep_for(chrono::milliseconds(1000)); // 等待4秒钟
+}
+void print_jinggao() {
+    initgraph(800, 600); // 初始化图形窗口
+    settextstyle(20, 0, _T("宋体")); // 设置字体大小和样式
+    int screenWidth = getwidth(); // 获取屏幕宽度
+    int screenHeight = getheight(); // 获取屏幕高度
+    string warningText =
+            "警告：游戏前请详阅\n"
+            "有极少数人在观看某些视觉影像时，\n"
+            "可能会突然发生癫痫。这包括电子游戏\n"
+            "中的闪光或图形。游玩时，他们可能遇\n"
+            "到癫痫症状。即使无癫痫史，也有可能\n"
+            "出现类似反应。若您或家人有癫痫史，\n"
+            "请先咨询医生。\n"
+            "若在游戏中遇到以下情况：眼睛疼、视\n"
+            "觉异常、偏头痛、痉挛或意识障碍（例\n"
+            "如昏迷），请立即停止并咨询医生。\n"
+            "此外，若感到头痛、晕眩、恶心或不适，\n"
+            "亦应停止游戏。症状持续，请及时就医。\n";
+
+    // 计算文本总高度
+    int textHeight = 20 * count(warningText.begin(), warningText.end(), '\n');
+    // 计算起始位置，使文本居中显示
+    int startX = 0; // 居中显示，400 是文本宽度的估计值
+    int startY = 0; // 垂直居中显示
+    int lineSpacing = 30; // 行间距
+    int currentY = startY;
+    size_t pos = 0;
+    string line;
+    while ((pos = warningText.find("\n")) != string::npos) {
+        line = warningText.substr(0, pos);
+        outtextxy(startX, currentY, line.c_str());
+        currentY += lineSpacing;
+        warningText.erase(0, pos + 1);
+    }
+    outtextxy(startX, currentY, warningText.c_str()); // 输出剩余的文本
+
+    // 输出警告消息文本
+    outtextxy(startX, startY, warningText.c_str());
+    this_thread::sleep_for(chrono::milliseconds(4000)); // 等待4秒钟
 }
 int dis_calc(pair<int, int> Start, pair<int, int> End) {
 	return abs(Start.first - End.first) + abs(Start.second - End.second);
-}
-void clearFileContent(const std::string& filename) {
-	// Open the file in out mode which will truncate the file
-	std::ofstream ofs(filename, std::ofstream::out | std::ofstream::trunc);
-	// The file is now cleared
-	ofs.close();
 }
 void initial_board() {
 	for (int i = 0; i <= board_len + 1; i++) {
@@ -135,34 +180,26 @@ void find_next(pair<int, int> food) {
 	board[snake_body.front().first][snake_body.front().second] = true;
 }
 void board_print() { //打印棋盘
-	for (int i = 0; i <= board_len + 1; i++) cout << "-";
-	cout << "\n";
-	for (int i = 1; i <= board_len; i++) {//双重循环遍历整个棋盘
-		cout << "|";
-		for (int j = 1; j <= board_len; j++) {
-			pair<int, int> now = { i, j };
-			if (board[i][j] && food == now) cout << "*"; //食物的坐标是当前i，j
-			else if ((board[i][j])) cout << "■";
-			else cout << " ";
-		}
-		cout << "|\n"; //棋盘边界的处理/美化
-	}
-	for (int i = 0; i <= board_len + 1; i++) cout << "-";//棋盘边界的处理/美化
-	cout << "\n";
-}
-void print_jinggao() {
-	cout << "\n警告：游戏前请详阅\n\n"
-		<< "有极少数人在观看某些视觉影像时，\n\n"
-		<< "可能会突然发生癫痫。这包括电子游戏\n\n"
-		<< "中的闪光或图形。游玩时，他们可能遇\n\n"
-		<< "到癫痫症状。即使无癫痫史，也有可能\n\n"
-		<< "出现类似反应。若您或家人有癫痫史，\n\n"
-		<< "请先咨询医生。\n\n"
-		<< "若在游戏中遇到以下情况：眼睛疼、视\n\n"
-		<< "觉异常、偏头痛、痉挛或意识障碍（例\n\n"
-		<< "如昏迷），请立即停止并咨询医生。\n\n"
-		<< "此外，若感到头痛、晕眩、恶心或不适，\n\n"
-		<< "亦应停止游戏。症状持续，请及时就医。\n\n";
+    initgraph(800, 600); // 初始化图形窗口
+    cleardevice(); // 清空绘图窗口
+    int cellWidth = 30; // 格子宽度
+    int cellHeight = 30; // 格子高度
+    for (int i = 0; i <= board_len; ++i) {
+        for (int j = 0; j <= board_len; ++j) {
+            int left = j * cellWidth; // 左边界
+            int top = i * cellHeight; // 上边界
+            int right = left + cellWidth; // 右边界
+            int bottom = top + cellHeight; // 下边界
+            rectangle(left, top, right, bottom);
+            if (board[i][j] && food.first == i && food.second == j) {
+                setfillcolor(RED);
+                solidcircle(left + cellWidth / 2, top + cellHeight / 2, cellWidth / 2 - 2);
+            } else if (board[i][j]) { // 绘制蛇身
+                setfillcolor(GREEN);
+                solidrectangle(left + 2, top + 2, right - 2, bottom - 2);
+            }
+        }
+    }
 }
 void pat(int a, int b, string s) {
 	cout << star;
@@ -179,61 +216,73 @@ void print_jiesu() {
 	this_thread::sleep_for(chrono::milliseconds(500));
 
 }
+int calcTextWidth(const string& text, int fontSize) {
+    LOGFONT lf;
+    memset(&lf, 0, sizeof(LOGFONT));
+    lf.lfHeight = fontSize;
+    HFONT hFont = CreateFontIndirect(&lf);
+    HFONT hOldFont = (HFONT)SelectObject(GetImageHDC(), hFont);
+
+    SIZE size;
+    GetTextExtentPoint32(GetImageHDC(), text.c_str(), text.length(), &size);
+
+    SelectObject(GetImageHDC(), hOldFont);
+    DeleteObject(hFont);
+
+    return size.cx;
+}
+
+// 在指定位置绘制剧中文本
+void drawCenterText(int centerX, int y, const string& text, int fontSize) {
+    int textWidth = calcTextWidth(text, fontSize);
+    outtextxy(centerX - textWidth / 2, y, text.c_str());
+}
+
 void print_jiemian() {
-	//cout << YELLOW;
-	cout << "\n          贪吃蛇游戏主界面          \n\n\n";
-	std::string s;
-	s = "----------------------------------";
-	len = s.size();
-	std::cout << s << "\n\n\n";
+    initgraph(800, 600); // 初始化图形窗口
+    settextstyle(30, 0, _T("楷体")); // 设置字体大小和样式
 
-	string s1 = "1.简单模式";
-	int pre = calc(s1.size());
-	int bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    int screenWidth = getwidth(); // 获取屏幕宽度
+    int screenHeight = getheight(); // 获取屏幕高度
 
-	s1 = "2.中等模式";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    int y = 100; // 初始绘制的起始 y 坐标
 
-	s1 = "3.困难模式";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    // 绘制标题
+    drawCenterText(screenWidth / 2, y, "贪吃蛇游戏主界面", 30);
+    y += 50; // 下移一行
 
-	s1 = "4.极限模式";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    // 绘制分隔线
+    line(100, y, screenWidth - 100, y);
+    y += 30; // 下移一行
 
-	s1 = "5.无尽模式";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    // 绘制选项
+    string options[] = {
+            "1.简单模式",
+            "2.中等模式",
+            "3.困难模式",
+            "4.极限模式",
+            "5.无尽模式",
+            "6.演示模式",
+            "7.排行榜",
+            "8.游戏说明",
+            "0.退出游戏"
+    };
 
-	s1 = "6.演示模式";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    for (const auto& option : options) {
+        drawCenterText(screenWidth / 2, y, option, 24);
+        y += 30; // 下移一行
+    }
 
-	s1 = "7.排行榜";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    // 绘制底部分隔线
+    y += 30; // 下移一行
+    line(100, y, screenWidth - 100, y);
 
-	s1 = "8.游戏说明";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
+    // 提示用户选择
+    y += 50; // 下移一行
+    drawCenterText(screenWidth / 2, y, "请选择你需要使用的功能:", 24);
 
-	s1 = "0.退出游戏";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
-
-	std::cout << s << "\n\n";
-	cout << "\n请选择你需要使用的功能:\n\n";
+    getch(); // 等待用户按键
+    closegraph(); // 关闭图形窗口
 }
 void do_game() {
 	int initial_cnt = 3; //初始小蛇的身体长度
@@ -398,45 +447,83 @@ void print_auto() {
 	this_thread::sleep_for(chrono::milliseconds(2000));  system("cls");
 }
 void run_and_calc(int x) {
-	auto _start = chrono::high_resolution_clock::now();
-	do_game();
-	auto _end = chrono::high_resolution_clock::now();
-	int all_time = chrono::duration_cast<chrono::milliseconds>(_end - _start).count();
-	double sec = all_time * 1.0 / 1000;
-	int goal = snake_body.size() - 3;
-	goal = max(0, goal);
-	information[x].insert({ goal, sec });
-	system("cls");
-	// cout << "\n" << sec << " " << goal << "\n";
-	cout << "\n\n你的用时：" << sec << "s" << "  " << "你的等分：" << goal << "分\n\n";
-	this_thread::sleep_for(chrono::milliseconds(2000));
-	system("cls");
-	cout << "\n\n正在返回主菜单...";
-	this_thread::sleep_for(chrono::milliseconds(1000));
-	system("cls");
+    auto _start = chrono::high_resolution_clock::now();
+    do_game();
+    auto _end = chrono::high_resolution_clock::now();
+    int all_time = chrono::duration_cast<chrono::milliseconds>(_end - _start).count();
+    double sec = all_time * 1.0 / 1000;
+    int goal = snake_body.size() - 3;
+    goal = max(0, goal);
+    information[x].insert({goal, sec});
+    initgraph(800, 600); // 初始化图形窗口
+    cleardevice(); // 清空绘图窗口
+    // 输出用时和得分信息
+    settextstyle(30, 0, _T("宋体"));
+    stringstream ss;
+    ss << "你的用时：" << sec << "s  你的得分：" << goal << "分";
+    outtextxy(50, 100, ss.str().c_str());
+    // 显示返回主菜单提示
+    settextstyle(20, 0, _T("宋体"));
+    outtextxy(250, 300, _T("正在返回主菜单..."));
+    // 结束绘图
+    getch(); // 等待用户按键
+    closegraph(); // 关闭图形窗口
+    // 清理控制台
+    system("cls");
 }
 void print_paihang() {
-	cout << "\n\n排行榜只有三种，分别为普通模式（低中高速度），极限模式和无尽模式\n\n";
-	cout << "\n              排行榜          \n\n\n";
-	std::string s;
-	s = "----------------------------------";
-	len = s.size();
-	std::cout << s << "\n\n\n";
-	string s1 = "1.普通模式";
-	int pre = calc(s1.size());
-	int bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
-	s1 = "2.极限模式";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
-	s1 = "3.无尽模式";
-	pre = calc(s1.size());
-	bac = len - 6 - s1.size() - pre;
-	pat(pre, bac, s1);
-	std::cout << s << "\n\n";
-	cout << "\n请选择需要查看的排行榜:\n\n";
+    initgraph(800, 600); // 初始化图形窗口
+    setbkcolor(LIGHTGRAY); // 设置背景颜色为浅灰色
+    cleardevice(); // 清空绘图窗口
 
+    // 设置字体大小和样式
+    LOGFONT lf;
+    settextstyle(40, 0, _T("宋体"));
+    gettextstyle(&lf); // 获取当前字体信息
+    HFONT hFont = CreateFontIndirect(&lf); // 创建字体
+
+    // 要显示的文本内容
+    string title = "排行榜";
+    string instructions = "排行榜只有三种，分别为普通模式（低中高速度），极限模式和无尽模式";
+    string line = "----------------------------------";
+    string modes[3] = {"普通模式", "极限模式", "无尽模式"};
+    string selectPrompt = "请选择需要查看的排行榜:";
+
+    // 计算标题的位置
+    int titleWidth = textwidth(title.c_str());
+    int titleX = (getmaxx() - titleWidth) / 2; // 水平居中
+
+    // 输出标题
+    outtextxy(titleX, 50, title.c_str());
+
+    // 输出说明信息
+    int instructionsWidth = textwidth(instructions.c_str());
+    int instructionsX = (getmaxx() - instructionsWidth) / 2; // 水平居中
+    outtextxy(instructionsX, 120, instructions.c_str());
+
+    // 输出分隔线
+    int lineWidth = textwidth(line.c_str());
+    int lineX = (getmaxx() - lineWidth) / 2; // 水平居中
+    outtextxy(lineX, 200, line.c_str());
+
+    // 输出模式列表
+    int startY = 270; // 起始纵坐标
+    int index = 0;
+    for (const auto& mode : modes) {
+        string option = to_string(index + 1) + "." + mode;
+        int optionWidth = textwidth(option.c_str());
+        int optionX = (getmaxx() - optionWidth) / 2; // 水平居中
+        outtextxy(optionX, startY + index * 50, option.c_str());
+        index++;
+    }
+
+    // 输出选择提示
+    int selectPromptWidth = textwidth(selectPrompt.c_str());
+    int selectPromptX = (getmaxx() - selectPromptWidth) / 2; // 水平居中
+    outtextxy(selectPromptX, 450, selectPrompt.c_str());
+
+    // 恢复默认字体
+    DeleteObject(hFont);
 }
 void file_gan(string s, int x, bool run) {
 	FILE* file = fopen(s.c_str(), "r");
@@ -459,19 +546,21 @@ void file_gan(string s, int x, bool run) {
 		fclose(file);
 	}
 }
+
+
 int main() {
-	cout << setprecision(3);
-	cout << "\n声明：该游戏处于未开发完全状态存在许多BUG以及设计的不合理性\n\n";
-	this_thread::sleep_for(chrono::milliseconds(2000));  system("cls");
-	print_jinggao();
-	this_thread::sleep_for(chrono::milliseconds(4000));  system("cls");
+    cout << setprecision(3);
+    //print_warning();
+    //print_jinggao();
 	while (1) {
 		string file;
 		deal_end();
-		print_jiemian();
+		//print_jiemian();
 		initial_board();
-		cin >> jud; //模式的选择
-		system("cls");
+        if(!_kbhit()) {
+            char key = _getch();//获取键盘输入
+            jud = key - '0'; // 将字符转换为整数
+        }
 		switch (jud) {
 		case 0:
 			print_jiesu();
